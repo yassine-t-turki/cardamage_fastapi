@@ -19,7 +19,7 @@ app = FastAPI()
 # Initialize inference client
 CLIENT = InferenceHTTPClient(
     api_url="https://detect.roboflow.com",
-    api_key="mMBVXsXJjIB3RSeH0SRP"
+    api_key="Insert API key here"
 )
 
 # Define directories
