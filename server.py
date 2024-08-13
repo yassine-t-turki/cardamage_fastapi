@@ -11,17 +11,6 @@ from config import UPLOAD_DIR, ANNOTATED_DIR, templates, metadata_cardmg
 # Initialize FastAPI
 app = FastAPI()
 
-
-
-# os.makedirs(UPLOAD_DIR, exist_ok=True)
-# os.makedirs(ANNOTATED_DIR, exist_ok=True)
-
-# Initialize Jinja2 template renderer
-templates = templates
-
-# Access the metadata catalog and register metadata for the dataset
-metadata_cardmg = metadata_cardmg
-
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, image_display: str = '', label_position: str = "TOP_RIGHT", threshold_bbox: float = 0.4, threshold_mask: float = 0.4, file_name: str = '', chosen_model: str = 'bounding_box'):
     return await read_root_wrapper(request, image_display, label_position, threshold_bbox, threshold_mask, file_name, chosen_model)
