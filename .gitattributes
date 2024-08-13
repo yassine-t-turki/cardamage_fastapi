@@ -1,1 +1,4 @@
 model/maskrcnn.pth filter=lfs diff=lfs merge=lfs -text
+**/__pycache__/
+uploads/
+
