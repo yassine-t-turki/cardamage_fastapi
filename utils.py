@@ -3,6 +3,7 @@ from PIL import Image
 from config import UPLOAD_DIR
 import supervision as sv
 from typing import List
+import json
 
 
 # Helper function to get list of uploaded files
@@ -78,3 +79,9 @@ def combine_images(image1, image2, align='horizontal'):
         combined_image.paste(image2_resized, (0, image1_resized.height))
 
     return combined_image
+
+
+def load_api_keys(file_path):
+    with open(file_path, 'r') as file:
+        config = json.load(file)
+    return config

@@ -3,7 +3,7 @@
 <head>
     <title>Image Upload and Analysis</title>
     <style>
-        /* Add your CSS here */
+        /* Existing CSS styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -71,12 +71,57 @@
             color: #7f8c8d;
             margin-bottom: 20px;
         }
+        .chatbot-response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #eaf0f1;
+            border-radius: 4px;
+            border: 1px solid #ccd1d1;
+        }
+        .chat-interface {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #eaf0f1;
+            border-radius: 4px;
+            border: 1px solid #ccd1d1;
+        }
+        .chat-interface textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .chat-interface button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .chat-interface button:hover {
+            background-color: #2980b9;
+        }
+        .chat-messages {
+            margin-top: 10px;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+        }
+        .chat-message.user {
+            color: #2c3e50;
+        }
+        .chat-message.bot {
+            color: #16a085;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Image Upload and Analysis</h1>
-        
+
         <!-- Upload Image Form -->
         <h2 class="subtitle">Upload an image and run the scan</h2>
         <form action="/upload" method="post" enctype="multipart/form-data">
@@ -87,20 +132,20 @@
             <select name="chosen_model" id="chosen_model" onchange="updateForm()">
                 <option value="bounding_box" {% if selected_model == 'bounding_box' %}selected{% endif %}>Bounding Box</option>
                 <option value="mask_segmentation" {% if selected_model == 'mask_segmentation' %}selected{% endif %}>Mask Segmentation</option>
-                <option value="both_models" {% if selected_model == 'both_models' %}selected{% endif %}>Both Models</option>
+                <option value="all_models" {% if selected_model == 'all_models' %}selected{% endif %}>All Models</option>
             </select>
             
-            <div id="bounding_box_options" style="display: {% if selected_model == 'bounding_box' or selected_model == 'both_models' %}block{% else %}none{% endif %};">
+            <div id="bounding_box_options" style="display: {% if selected_model == 'bounding_box' or selected_model == 'all_models' %}block{% else %}none{% endif %};">
                 <label for="threshold_bbox">Confidence Threshold for Bounding Box:</label>
                 <input type="number" name="threshold_bbox" id="threshold_bbox" step="0.01" min="0" max="1" value="{{ selected_threshold_bbox }}">
                 
-                <label for="label_position">Label Position:</label>
+                <label for="label_position">Label Position for Bounding Box model:</label>
                 <select name="label_position" id="label_position">
                     {{ label_position_options|safe }}
                 </select>
             </div>
             
-            <div id="mask_segmentation_options" style="display: {% if selected_model == 'mask_segmentation' or selected_model == 'both_models' %}block{% else %}none{% endif %};">
+            <div id="mask_segmentation_options" style="display: {% if selected_model == 'mask_segmentation' or selected_model == 'all_models' %}block{% else %}none{% endif %};">
                 <label for="threshold_mask">Confidence Threshold for Mask Segmentation:</label>
                 <input type="number" name="threshold_mask" id="threshold_mask" step="0.01" min="0" max="1" value="{{ selected_threshold_mask }}">
             </div>
@@ -120,23 +165,24 @@
             <select name="chosen_model_rerun" id="chosen_model_rerun" onchange="updateFormRerun()">
                 <option value="bounding_box" {% if selected_model == 'bounding_box' %}selected{% endif %}>Bounding Box</option>
                 <option value="mask_segmentation" {% if selected_model == 'mask_segmentation' %}selected{% endif %}>Mask Segmentation</option>
-                <option value="both_models" {% if selected_model == 'both_models' %}selected{% endif %}>Both Models</option>
+                <option value="all_models" {% if selected_model == 'all_models' %}selected{% endif %}>All Models</option>
             </select>
             
-            <div id="bounding_box_options_rerun" style="display: {% if selected_model == 'bounding_box' or selected_model == 'both_models' %}block{% else %}none{% endif %};">
+            <div id="bounding_box_options_rerun" style="display: {% if selected_model == 'bounding_box' or selected_model == 'all_models' %}block{% else %}none{% endif %};">
                 <label for="threshold_bbox_rerun">Confidence Threshold for Bounding Box:</label>
                 <input type="number" name="threshold_bbox_rerun" id="threshold_bbox_rerun" step="0.01" min="0" max="1" value="{{ selected_threshold_bbox }}">
                 
-                <label for="label_position">Label Position:</label>
-                <select name="label_position" id="label_position">
+                <label for="label_position_rerun">Label Position for Bounding Box model:</label>
+                <select name="label_position_rerun" id="label_position_rerun">
                     {{ label_position_options|safe }}
                 </select>
             </div>
             
-            <div id="mask_segmentation_options_rerun" style="display: {% if selected_model == 'mask_segmentation' or selected_model == 'both_models' %}block{% else %}none{% endif %};">
+            <div id="mask_segmentation_options_rerun" style="display: {% if selected_model == 'mask_segmentation' or selected_model == 'all_models' %}block{% else %}none{% endif %};">
                 <label for="threshold_mask_rerun">Confidence Threshold for Mask Segmentation:</label>
                 <input type="number" name="threshold_mask_rerun" id="threshold_mask_rerun" step="0.01" min="0" max="1" value="{{ selected_threshold_mask }}">
             </div>
+
             
             <input type="submit" value="Rerun Analysis">
         </form>
@@ -148,25 +194,69 @@
             <p>Annotated Image: {{ file_name }}</p>
             {% endif %}
         </div>
+        
+        <!-- Display Chatbot Response -->
+        {% if chatbot_response %}
+        <div class="chatbot-response">
+            <h2>Chatbot Response:</h2>
+            <p>{{ chatbot_response }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Chatbot Interaction -->
+        <div class="chat-interface">
+            <h2>Chat with the Bot:</h2>
+            <textarea id="chat-input" rows="4" placeholder="Type your message here..."></textarea>
+            <br>
+            <button id="send-message">Send</button>
+            <div id="chat-messages" class="chat-messages">
+                <!-- Chat messages will be appended here -->
+            </div>
+        </div>
     </div>
 
     <script>
         function updateForm() {
             const model = document.getElementById('chosen_model').value;
-            document.getElementById('bounding_box_options').style.display = (model === 'bounding_box' || model === 'both_models') ? 'block' : 'none';
-            document.getElementById('mask_segmentation_options').style.display = (model === 'mask_segmentation' || model === 'both_models') ? 'block' : 'none';
+            document.getElementById('bounding_box_options').style.display = (model === 'bounding_box' || model === 'all_models') ? 'block' : 'none';
+            document.getElementById('mask_segmentation_options').style.display = (model === 'mask_segmentation' || model === 'all_models') ? 'block' : 'none';
         }
 
         function updateFormRerun() {
             const model = document.getElementById('chosen_model_rerun').value;
-            document.getElementById('bounding_box_options_rerun').style.display = (model === 'bounding_box' || model === 'both_models') ? 'block' : 'none';
-            document.getElementById('mask_segmentation_options_rerun').style.display = (model === 'mask_segmentation' || model === 'both_models') ? 'block' : 'none';
+            document.getElementById('bounding_box_options_rerun').style.display = (model === 'bounding_box' || model === 'all_models') ? 'block' : 'none';
+            document.getElementById('mask_segmentation_options_rerun').style.display = (model === 'mask_segmentation' || model === 'all_models') ? 'block' : 'none';
         }
 
         // Initialize the form display based on the selected model on page load
         document.addEventListener('DOMContentLoaded', (event) => {
             updateForm();
             updateFormRerun();
+        });
+
+        document.getElementById('send-message').addEventListener('click', async () => {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'message': message
+                    })
+                });
+
+                const result = await response.json();
+                const chatMessages = document.getElementById('chat-messages');
+                const newMessage = document.createElement('div');
+                newMessage.classList.add('chat-message');
+                newMessage.classList.add('user');
+                newMessage.innerHTML = `<strong>You:</strong> ${message}<br><strong>Bot:</strong> ${result.response}`;
+                chatMessages.appendChild(newMessage);
+                input.value = '';
+            }
         });
     </script>
 </body>
