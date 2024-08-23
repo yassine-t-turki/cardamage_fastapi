@@ -1,9 +1,6 @@
-{
-    "roboflow_api_key": "mMBVXsXJjIB3RSeH0SRP",
-    "model_deployment_name_azure": "test",
-    "api_key_azure": "ee6a8db755cf4ad5b9454d71c5c3d14f",
-    "endpoint_azure": "https://raneemsresource.openai.azure.com/"
-}
-
+{"roboflow_api_key": "api key from roboflow",
+"model_deployment_name_azure": "model name for chatbot (deployment name not actual model name, a valid name would be test. an invalid name would be the actual model name such as gpt4)",
+    "api_key_azure": "api key from azure", 
+    "endpoint_azure": "azure endpoint (https...)"}
 
 
