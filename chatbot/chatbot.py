@@ -1,10 +1,6 @@
 from openai import AzureOpenAI
 from utils import load_api_keys
 
-model_name = "test"
-api_key = "ee6a8db755cf4ad5b9454d71c5c3d14f"
-endpoint = "https://raneemsresource.openai.azure.com/"
-
 api_keys = load_api_keys('keys.json')
 
 model_deployment_name_azure = api_keys.get('model_deployment_name_azure')
